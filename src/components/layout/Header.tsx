@@ -98,15 +98,23 @@ export function Header() {
                       {profile?.full_name || user.email}
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile">My Profile</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/orders">My Orders</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/addresses">My Addresses</Link>
-                    </DropdownMenuItem>
+                    {isAdmin ? (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin">Dashboard</Link>
+                      </DropdownMenuItem>
+                    ) : (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/profile">My Profile</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/orders">My Orders</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/addresses">My Addresses</Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />

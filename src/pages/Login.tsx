@@ -25,8 +25,14 @@ export default function Login() {
     }
 
     if (data.user) {
+      const role = data.user.user_metadata?.role;
       toast({ title: 'Success', description: 'Logged in successfully' });
-      navigate('/');
+      
+      if (role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
     setLoading(false);
   };

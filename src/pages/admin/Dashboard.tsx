@@ -1,0 +1,61 @@
+import { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Layout } from '@/components/layout/Layout';
+import { useAuth } from '@/contexts/AuthContext';
+import { Package, ShoppingBag, Users, BarChart } from 'lucide-react';
+
+export default function AdminDashboard() {
+  const { isAdmin, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      navigate('/');
+    }
+  }, [isAdmin, isLoading, navigate]);
+
+  if (isLoading) return <Layout><div className="container py-8">Loading...</div></Layout>;
+  if (!isAdmin) return null;
+
+  return (
+    <Layout>
+      <div className="container py-8">
+        <h1 className="font-display text-4xl font-bold mb-8">Admin Dashboard</h1>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-card rounded-lg border p-6">
+            <Package className="h-8 w-8 text-primary mb-2" />
+            <h3 className="font-semibold text-2xl">0</h3>
+            <p className="text-muted-foreground">Total Products</p>
+          </div>
+          <div className="bg-card rounded-lg border p-6">
+            <ShoppingBag className="h-8 w-8 text-primary mb-2" />
+            <h3 className="font-semibold text-2xl">0</h3>
+            <p className="text-muted-foreground">Total Orders</p>
+          </div>
+          <div className="bg-card rounded-lg border p-6">
+            <Users className="h-8 w-8 text-primary mb-2" />
+            <h3 className="font-semibold text-2xl">0</h3>
+            <p className="text-muted-foreground">Total Users</p>
+          </div>
+          <div className="bg-card rounded-lg border p-6">
+            <BarChart className="h-8 w-8 text-primary mb-2" />
+            <h3 className="font-semibold text-2xl">₹0</h3>
+            <p className="text-muted-foreground">Total Revenue</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <Link to="/admin/products" className="bg-card rounded-lg border p-6 hover:border-primary transition-colors">
+            <h3 className="font-semibold text-xl mb-2">Manage Products</h3>
+            <p className="text-muted-foreground">Add, edit, or remove products</p>
+          </Link>
+          <div className="bg-card rounded-lg border p-6 opacity-50">
+            <h3 className="font-semibold text-xl mb-2">Manage Orders</h3>
+            <p className="text-muted-foreground">View and update order status</p>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
