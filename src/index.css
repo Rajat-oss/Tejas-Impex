@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Forest Green & Cream Theme for TejasImpex */
+    --background: 36 33% 97%;
+    --foreground: 120 20% 15%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 120 20% 15%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 20% 15%;
+    
+    --primary: 100 50% 22%;
+    --primary-foreground: 36 33% 97%;
+    
+    --secondary: 36 30% 90%;
+    --secondary-foreground: 120 20% 15%;
+    
+    --muted: 36 20% 92%;
+    --muted-foreground: 120 10% 40%;
+    
+    --accent: 45 80% 50%;
+    --accent-foreground: 120 20% 15%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 120 10% 85%;
+    --input: 120 10% 85%;
+    --ring: 100 50% 22%;
+    
+    --radius: 0.75rem;
+    
+    /* Custom semantic tokens */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Brand colors */
+    --forest: 100 50% 22%;
+    --forest-light: 100 40% 35%;
+    --forest-dark: 100 60% 15%;
+    --cream: 36 33% 97%;
+    --cream-dark: 36 30% 90%;
+    --gold: 45 80% 50%;
+    --gold-light: 45 85% 65%;
+    --earth: 30 30% 35%;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(120 20% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(120 20% 15% / 0.1), 0 2px 4px -2px hsl(120 20% 15% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(120 20% 15% / 0.1), 0 4px 6px -4px hsl(120 20% 15% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(120 20% 15% / 0.1), 0 8px 10px -6px hsl(120 20% 15% / 0.1);
+    --shadow-glow: 0 0 20px hsl(100 50% 22% / 0.15);
+    
+    /* Sidebar */
+    --sidebar-background: 100 50% 22%;
+    --sidebar-foreground: 36 33% 97%;
+    --sidebar-primary: 45 80% 50%;
+    --sidebar-primary-foreground: 120 20% 15%;
+    --sidebar-accent: 100 40% 28%;
+    --sidebar-accent-foreground: 36 33% 97%;
+    --sidebar-border: 100 40% 28%;
+    --sidebar-ring: 45 80% 50%;
+  }
+
+  .dark {
+    --background: 120 20% 10%;
+    --foreground: 36 33% 97%;
+    
+    --card: 120 20% 12%;
+    --card-foreground: 36 33% 97%;
+    
+    --popover: 120 20% 12%;
+    --popover-foreground: 36 33% 97%;
+    
+    --primary: 100 45% 45%;
+    --primary-foreground: 120 20% 10%;
+    
+    --secondary: 120 15% 20%;
+    --secondary-foreground: 36 33% 97%;
+    
+    --muted: 120 15% 18%;
+    --muted-foreground: 36 20% 65%;
+    
+    --accent: 45 80% 55%;
+    --accent-foreground: 120 20% 10%;
+    
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 120 15% 25%;
+    --input: 120 15% 25%;
+    --ring: 100 45% 45%;
+    
+    --forest: 100 45% 45%;
+    --forest-light: 100 40% 55%;
+    --forest-dark: 100 50% 35%;
+    --cream: 36 20% 90%;
+    --cream-dark: 36 15% 80%;
+    --gold: 45 80% 55%;
+    --gold-light: 45 85% 70%;
+    --earth: 30 20% 60%;
+    
+    --sidebar-background: 120 20% 8%;
+    --sidebar-foreground: 36 33% 97%;
+    --sidebar-primary: 45 80% 55%;
+    --sidebar-primary-foreground: 120 20% 10%;
+    --sidebar-accent: 120 20% 15%;
+    --sidebar-accent-foreground: 36 33% 97%;
+    --sidebar-border: 120 15% 20%;
+    --sidebar-ring: 45 80% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/50;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--forest)) 0%, hsl(var(--forest-light)) 100%);
+  }
+  
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+}
