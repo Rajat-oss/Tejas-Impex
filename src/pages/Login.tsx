@@ -25,10 +25,16 @@ export default function Login() {
     }
 
     if (data.user) {
-      const role = data.user.user_metadata?.role;
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
       toast({ title: 'Success', description: 'Logged in successfully' });
       
-      if (role === 'admin') {
+      if (roleData) {
         navigate('/admin');
       } else {
         navigate('/');

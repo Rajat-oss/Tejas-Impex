@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 import Categories from "./pages/Categories";
 import Offers from "./pages/Offers";
 import NewArrivals from "./pages/NewArrivals";
@@ -14,7 +15,13 @@ import ContactUs from "./pages/ContactUs";
 import Brands from "./pages/Brands";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+<<<<<<< HEAD
 import Profile from "./pages/Profile";
+=======
+import Cart from "./pages/Cart";
+import Wishlist from "./pages/Wishlist";
+import Orders from "./pages/Orders";
+>>>>>>> dfd4ac6f7aeff272a754408a070ebede1abb8289
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import NotFound from "./pages/NotFound";
@@ -32,6 +39,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/offers" element={<Offers />} />
               <Route path="/new-arrivals" element={<NewArrivals />} />
@@ -39,7 +47,13 @@ const App = () => (
               <Route path="/brands" element={<Brands />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+<<<<<<< HEAD
               <Route path="/profile" element={<Profile />} />
+=======
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/orders" element={<Orders />} />
+>>>>>>> dfd4ac6f7aeff272a754408a070ebede1abb8289
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="*" element={<NotFound />} />

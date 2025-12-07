@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const role = session.user.user_metadata?.role;
-          setIsAdmin(role === 'admin');
+          checkAdminRole(session.user.id);
+          fetchProfile(session.user.id);
         } else {
           setProfile(null);
           setIsAdmin(false);
@@ -80,8 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        const role = session.user.user_metadata?.role;
-        setIsAdmin(role === 'admin');
+        checkAdminRole(session.user.id);
+        fetchProfile(session.user.id);
       }
       setIsLoading(false);
     });
@@ -116,11 +116,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setProfile(null);
     setIsAdmin(false);
+    await supabase.auth.signOut();
   };
 
   const refreshProfile = async () => {
