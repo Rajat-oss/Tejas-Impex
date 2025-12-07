@@ -223,7 +223,56 @@ export default function Cart() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={() => setCheckoutStep(1)} className="flex-1">Back</Button>
-                    <Button onClick={handleCheckout} className="flex-1">Place Order</Button>
+                    <Button onClick={() => setCheckoutStep(3)} className="flex-1">Continue</Button>
+                  </div>
+                </>
+              )}
+              
+              {checkoutStep === 3 && (
+                <>
+                  <h2 className="text-2xl font-bold mb-4">Invoice</h2>
+                  <div className="space-y-4 mb-6">
+                    <div className="border-b pb-3">
+                      <p className="font-semibold">Delivery Address:</p>
+                      <p className="text-sm">{address.full_name}</p>
+                      <p className="text-sm">{address.phone}</p>
+                      <p className="text-sm">{address.address_line}</p>
+                      <p className="text-sm">{address.city}, {address.state} - {address.pincode}</p>
+                    </div>
+                    
+                    <div className="border-b pb-3">
+                      <p className="font-semibold mb-2">Items:</p>
+                      {cartItems.map((item) => (
+                        <div key={item.id} className="flex justify-between text-sm mb-1">
+                          <span>{item.products?.name} x {item.quantity}</span>
+                          <span>₹{(item.products?.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Subtotal</span>
+                        <span>₹{total.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Shipping</span>
+                        <span>₹{shippingCost.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-lg border-t pt-2">
+                        <span>Total</span>
+                        <span>₹{finalTotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-secondary p-3 rounded">
+                      <p className="text-sm font-semibold">Payment Method:</p>
+                      <p className="text-sm">{paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'upi' ? 'UPI Payment' : 'Credit/Debit Card'}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setCheckoutStep(2)} className="flex-1">Back</Button>
+                    <Button onClick={handleCheckout} className="flex-1">Confirm & Place Order</Button>
                   </div>
                 </>
               )}
