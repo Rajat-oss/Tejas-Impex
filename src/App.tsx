@@ -15,13 +15,9 @@ import ContactUs from "./pages/ContactUs";
 import Brands from "./pages/Brands";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-<<<<<<< HEAD
-import Profile from "./pages/Profile";
-=======
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Orders from "./pages/Orders";
->>>>>>> dfd4ac6f7aeff272a754408a070ebede1abb8289
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import NotFound from "./pages/NotFound";
@@ -47,13 +43,9 @@ const App = () => (
               <Route path="/brands" element={<Brands />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-<<<<<<< HEAD
-              <Route path="/profile" element={<Profile />} />
-=======
               <Route path="/cart" element={<Cart />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/orders" element={<Orders />} />
->>>>>>> dfd4ac6f7aeff272a754408a070ebede1abb8289
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="*" element={<NotFound />} />
