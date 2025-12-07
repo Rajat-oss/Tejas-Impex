@@ -13,6 +13,7 @@ export default function ProductDetail() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [product, setProduct] = useState<any>(null);
+  const [similarProducts, setSimilarProducts] = useState<any[]>([]);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -20,6 +21,10 @@ export default function ProductDetail() {
     loadProduct();
     if (user) checkWishlist();
   }, [id, user]);
+
+  useEffect(() => {
+    if (product?.category_id) loadSimilarProducts();
+  }, [product]);
 
   const loadProduct = async () => {
     const { data } = await supabase
@@ -35,6 +40,21 @@ export default function ProductDetail() {
     
     if (data) setProduct(data);
     setLoading(false);
+  };
+
+  const loadSimilarProducts = async () => {
+    const { data } = await supabase
+      .from('products')
+      .select(`
+        *,
+        product_images(image_url)
+      `)
+      .eq('category_id', product.category_id)
+      .eq('is_active', true)
+      .neq('id', id)
+      .limit(4);
+    
+    if (data) setSimilarProducts(data);
   };
 
   const checkWishlist = async () => {
@@ -86,9 +106,9 @@ export default function ProductDetail() {
 
   return (
     <Layout>
-      <div className="container py-8">
+      <div className="container py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="grid md:grid-cols-2 gap-8">
-          <div>
+          <div className="animate-in fade-in slide-in-from-left-8 duration-700">
             {product.product_images?.[0]?.image_url ? (
               <img
                 src={product.product_images[0].image_url}
@@ -100,7 +120,7 @@ export default function ProductDetail() {
             )}
           </div>
           
-          <div>
+          <div className="animate-in fade-in slide-in-from-right-8 duration-700">
             <h1 className="font-display text-4xl font-bold mb-2">{product.name}</h1>
             {product.brands && (
               <p className="text-muted-foreground mb-4">by {product.brands.name}</p>
@@ -156,6 +176,33 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+
+        {similarProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold mb-6">Similar Products</h2>
+            <div className="grid md:grid-cols-4 gap-6">
+              {similarProducts.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-card rounded-lg border p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/product/${item.id}`)}
+                >
+                  {item.product_images?.[0]?.image_url ? (
+                    <img
+                      src={item.product_images[0].image_url}
+                      alt={item.name}
+                      className="aspect-square object-cover rounded-md mb-4"
+                    />
+                  ) : (
+                    <div className="aspect-square bg-secondary rounded-md mb-4" />
+                  )}
+                  <h3 className="font-semibold mb-2">{item.name}</h3>
+                  <p className="font-bold text-primary">₹{item.price}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
