@@ -20,6 +20,7 @@ export default function AdminProducts() {
     description: '',
     stock_quantity: '',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAdmin) navigate('/');
@@ -33,20 +34,49 @@ export default function AdminProducts() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from('products').insert({
+    
+    let imageUrl = null;
+    if (imageFile) {
+      const fileName = `${Date.now()}-${imageFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(fileName, imageFile);
+      
+      if (uploadError) {
+        toast({ title: 'Error', description: 'Failed to upload image', variant: 'destructive' });
+        return;
+      }
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('products')
+        .getPublicUrl(fileName);
+      imageUrl = publicUrl;
+    }
+
+    const { data: product, error } = await supabase.from('products').insert({
       ...formData,
       price: parseFloat(formData.price),
       stock_quantity: parseInt(formData.stock_quantity),
-    });
+    }).select().single();
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Success', description: 'Product added successfully' });
-      setShowForm(false);
-      setFormData({ name: '', slug: '', price: '', description: '', stock_quantity: '' });
-      loadProducts();
+      return;
     }
+
+    if (imageUrl && product) {
+      await supabase.from('product_images').insert({
+        product_id: product.id,
+        image_url: imageUrl,
+        sort_order: 0,
+      });
+    }
+
+    toast({ title: 'Success', description: 'Product added successfully' });
+    setShowForm(false);
+    setFormData({ name: '', slug: '', price: '', description: '', stock_quantity: '' });
+    setImageFile(null);
+    loadProducts();
   };
 
   const handleDelete = async (id: string) => {
@@ -116,6 +146,15 @@ export default function AdminProducts() {
               className="w-full px-4 py-2 rounded-md border bg-background mt-4"
               rows={3}
             />
+            <div className="mt-4">
+              <label className="block text-sm font-medium mb-2">Product Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                className="w-full px-4 py-2 rounded-md border bg-background"
+              />
+            </div>
             <div className="flex gap-2 mt-4">
               <Button type="submit">Add Product</Button>
               <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
