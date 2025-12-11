@@ -20,7 +20,9 @@ import Wishlist from "./pages/Wishlist";
 import Orders from "./pages/Orders";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
+import AdminSupplierApprovals from "./pages/admin/SupplierApprovals";
 import SupplierDashboard from "./pages/SupplierDashboard";
+import SupplierPending from "./pages/SupplierPending";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -52,7 +54,9 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/products" element={<ProtectedRoute requireAdmin><AdminProducts /></ProtectedRoute>} />
+              <Route path="/admin/suppliers" element={<ProtectedRoute requireAdmin><AdminSupplierApprovals /></ProtectedRoute>} />
               <Route path="/supplier" element={<ProtectedRoute requireSupplier><SupplierDashboard /></ProtectedRoute>} />
+              <Route path="/supplier-pending" element={<ProtectedRoute requireSupplier><SupplierPending /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

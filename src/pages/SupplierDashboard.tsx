@@ -7,15 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Package, Plus } from 'lucide-react';
 
 export default function SupplierDashboard() {
-  const { user, isSupplier, isLoading } = useAuth();
+  const { user, profile, isSupplier, isLoading } = useAuth();
   const navigate = useNavigate();
   const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     if (!isLoading && (!user || !isSupplier)) {
       navigate('/login');
+    } else if (!isLoading && profile?.approval_status === 'pending') {
+      navigate('/supplier-pending');
     }
-  }, [user, isSupplier, isLoading, navigate]);
+  }, [user, isSupplier, profile, isLoading, navigate]);
 
   useEffect(() => {
     if (user && isSupplier) {
@@ -33,7 +35,7 @@ export default function SupplierDashboard() {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (!isSupplier) return null;
+  if (!isSupplier || profile?.approval_status !== 'approved') return null;
 
   return (
     <Layout>

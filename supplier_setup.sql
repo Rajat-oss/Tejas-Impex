@@ -18,7 +18,8 @@ ALTER TABLE public.profiles
 ADD COLUMN IF NOT EXISTS business_name TEXT,
 ADD COLUMN IF NOT EXISTS business_address TEXT,
 ADD COLUMN IF NOT EXISTS gst_number TEXT,
-ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
+ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS approval_status TEXT DEFAULT 'pending' CHECK (approval_status IN ('pending', 'approved', 'rejected'));
 
 -- Step 3: Create supplier_products table
 CREATE TABLE IF NOT EXISTS public.supplier_products (
@@ -41,18 +42,30 @@ DROP POLICY IF EXISTS "Suppliers can update own products" ON public.supplier_pro
 DROP POLICY IF EXISTS "Suppliers can delete own products" ON public.supplier_products;
 DROP POLICY IF EXISTS "Admins can manage supplier products" ON public.supplier_products;
 
--- Step 6: Create RLS policies for supplier_products
-CREATE POLICY "Suppliers can view own products" ON public.supplier_products
-  FOR SELECT USING (auth.uid() = supplier_id);
+-- Step 6: Create RLS policies for supplier_products (only approved suppliers)
+CREATE POLICY "Approved suppliers can view own products" ON public.supplier_products
+  FOR SELECT USING (
+    auth.uid() = supplier_id AND 
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND approval_status = 'approved')
+  );
 
-CREATE POLICY "Suppliers can add products" ON public.supplier_products
-  FOR INSERT WITH CHECK (auth.uid() = supplier_id);
+CREATE POLICY "Approved suppliers can add products" ON public.supplier_products
+  FOR INSERT WITH CHECK (
+    auth.uid() = supplier_id AND 
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND approval_status = 'approved')
+  );
 
-CREATE POLICY "Suppliers can update own products" ON public.supplier_products
-  FOR UPDATE USING (auth.uid() = supplier_id);
+CREATE POLICY "Approved suppliers can update own products" ON public.supplier_products
+  FOR UPDATE USING (
+    auth.uid() = supplier_id AND 
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND approval_status = 'approved')
+  );
 
-CREATE POLICY "Suppliers can delete own products" ON public.supplier_products
-  FOR DELETE USING (auth.uid() = supplier_id);
+CREATE POLICY "Approved suppliers can delete own products" ON public.supplier_products
+  FOR DELETE USING (
+    auth.uid() = supplier_id AND 
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND approval_status = 'approved')
+  );
 
 -- Step 7: Admin can manage all supplier products (has_role function already exists)
 CREATE POLICY "Admins can manage supplier products" ON public.supplier_products
@@ -68,6 +81,7 @@ DECLARE
   user_role app_role;
   requested_role app_role;
   admin_email TEXT := 'admin@tejasimpex.com'; -- CHANGE THIS TO YOUR ADMIN EMAIL
+  profile_approval_status TEXT;
 BEGIN
   -- Get requested role from metadata
   requested_role := COALESCE((NEW.raw_user_meta_data ->> 'role')::app_role, 'user'::app_role);
@@ -79,13 +93,21 @@ BEGIN
     user_role := requested_role;
   END IF;
   
+  -- Set approval status: suppliers need approval, others are auto-approved
+  IF user_role = 'supplier' THEN
+    profile_approval_status := 'pending';
+  ELSE
+    profile_approval_status := 'approved';
+  END IF;
+  
   -- Insert profile
-  INSERT INTO public.profiles (id, full_name, email, phone)
+  INSERT INTO public.profiles (id, full_name, email, phone, approval_status)
   VALUES (
     NEW.id, 
     NEW.raw_user_meta_data ->> 'full_name', 
     NEW.email,
-    NEW.raw_user_meta_data ->> 'phone'
+    NEW.raw_user_meta_data ->> 'phone',
+    profile_approval_status
   );
   
   -- Insert role

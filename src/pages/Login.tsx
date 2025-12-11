@@ -31,12 +31,24 @@ export default function Login() {
         .eq('user_id', data.user.id)
         .maybeSingle();
       
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('approval_status')
+        .eq('id', data.user.id)
+        .single();
+      
       toast({ title: 'Success', description: 'Logged in successfully' });
       
       if (roleData?.role === 'admin') {
         navigate('/admin');
       } else if (roleData?.role === 'supplier') {
-        navigate('/supplier');
+        if (profileData?.approval_status === 'pending') {
+          navigate('/supplier-pending');
+        } else if (profileData?.approval_status === 'approved') {
+          navigate('/supplier');
+        } else {
+          navigate('/');
+        }
       } else {
         navigate('/');
       }

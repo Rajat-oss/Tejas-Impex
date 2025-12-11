@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
-import { Package, ShoppingBag, Users, BarChart } from 'lucide-react';
+import { Package, ShoppingBag, Users, BarChart, UserCheck } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { isAdmin, isLoading } = useAuth();
@@ -45,12 +45,19 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Link to="/admin/products" className="bg-card rounded-lg border p-6 hover:border-primary transition-colors">
+            <Package className="h-6 w-6 text-primary mb-2" />
             <h3 className="font-semibold text-xl mb-2">Manage Products</h3>
             <p className="text-muted-foreground">Add, edit, or remove products</p>
           </Link>
+          <Link to="/admin/suppliers" className="bg-card rounded-lg border p-6 hover:border-primary transition-colors">
+            <UserCheck className="h-6 w-6 text-primary mb-2" />
+            <h3 className="font-semibold text-xl mb-2">Supplier Approvals</h3>
+            <p className="text-muted-foreground">Approve or reject supplier requests</p>
+          </Link>
           <div className="bg-card rounded-lg border p-6 opacity-50">
+            <ShoppingBag className="h-6 w-6 text-muted-foreground mb-2" />
             <h3 className="font-semibold text-xl mb-2">Manage Orders</h3>
             <p className="text-muted-foreground">View and update order status</p>
           </div>
