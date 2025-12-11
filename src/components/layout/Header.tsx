@@ -27,7 +27,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const { user, profile, isAdmin, signOut } = useAuth();
+  const { user, profile, isAdmin, isSupplier, signOut } = useAuth();
   const { itemCount } = useCart();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -53,6 +53,9 @@ export function Header() {
             <Link to="/track-order" className="hover:underline">Track Order</Link>
             {isAdmin && (
               <Link to="/admin" className="hover:underline font-medium">Admin Panel</Link>
+            )}
+            {isSupplier && (
+              <Link to="/supplier" className="hover:underline font-medium">Supplier Dashboard</Link>
             )}
           </div>
         </div>
@@ -100,7 +103,11 @@ export function Header() {
                     <DropdownMenuSeparator />
                     {isAdmin ? (
                       <DropdownMenuItem asChild>
-                        <Link to="/admin">Dashboard</Link>
+                        <Link to="/admin">Admin Dashboard</Link>
+                      </DropdownMenuItem>
+                    ) : isSupplier ? (
+                      <DropdownMenuItem asChild>
+                        <Link to="/supplier">Supplier Dashboard</Link>
                       </DropdownMenuItem>
                     ) : (
                       <>

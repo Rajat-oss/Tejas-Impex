@@ -10,7 +10,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState<'user' | 'admin'>('user');
+  const [role, setRole] = useState<'user' | 'supplier' | 'admin'>('user');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -94,7 +94,7 @@ export default function Signup() {
                     type="radio"
                     value="user"
                     checked={role === 'user'}
-                    onChange={(e) => setRole(e.target.value as 'user')}
+                    onChange={(e) => setRole(e.target.value as 'user' | 'supplier' | 'admin')}
                     className="w-4 h-4"
                   />
                   <span>User</span>
@@ -102,9 +102,19 @@ export default function Signup() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
+                    value="supplier"
+                    checked={role === 'supplier'}
+                    onChange={(e) => setRole(e.target.value as 'user' | 'supplier' | 'admin')}
+                    className="w-4 h-4"
+                  />
+                  <span>Supplier</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
                     value="admin"
                     checked={role === 'admin'}
-                    onChange={(e) => setRole(e.target.value as 'admin')}
+                    onChange={(e) => setRole(e.target.value as 'user' | 'supplier' | 'admin')}
                     className="w-4 h-4"
                   />
                   <span>Admin</span>

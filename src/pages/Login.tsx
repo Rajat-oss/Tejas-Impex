@@ -29,13 +29,14 @@ export default function Login() {
         .from('user_roles')
         .select('role')
         .eq('user_id', data.user.id)
-        .eq('role', 'admin')
         .maybeSingle();
       
       toast({ title: 'Success', description: 'Logged in successfully' });
       
-      if (roleData) {
+      if (roleData?.role === 'admin') {
         navigate('/admin');
+      } else if (roleData?.role === 'supplier') {
+        navigate('/supplier');
       } else {
         navigate('/');
       }
