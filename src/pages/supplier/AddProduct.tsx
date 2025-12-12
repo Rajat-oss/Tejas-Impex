@@ -279,17 +279,17 @@ export default function AddProduct() {
                         <label className="cursor-pointer">
                           <input
                             type="file"
-                            accept="image/*"
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml"
                             className="hidden"
                             onChange={(e) => handleImageUpload(product.id, e.target.files?.[0] || null)}
                           />
                           <div className="flex items-center gap-1 text-xs text-primary hover:underline">
                             <Upload className="h-3 w-3" />
-                            Upload
+                            {product.image ? 'Change' : 'Upload'}
                           </div>
                         </label>
                         {product.imagePreview && (
-                          <img src={product.imagePreview} alt="Preview" className="w-12 h-12 object-cover rounded" />
+                          <img src={product.imagePreview} alt="Preview" className="w-16 h-16 object-cover rounded border" />
                         )}
                       </div>
                     </td>

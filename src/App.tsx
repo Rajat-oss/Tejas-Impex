@@ -32,6 +32,7 @@ import SupplierPending from "./pages/SupplierPending";
 import SupplierAddProduct from "./pages/supplier/AddProduct";
 import SupplierEditProduct from "./pages/supplier/EditProduct";
 import SupplierOrders from "./pages/supplier/Orders";
+import OrderTracking from "./pages/OrderTracking";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/orders" element={<Orders />} />
+              <Route path="/order-tracking/:orderId" element={<OrderTracking />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/products" element={<ProtectedRoute requireAdmin><AdminProducts /></ProtectedRoute>} />

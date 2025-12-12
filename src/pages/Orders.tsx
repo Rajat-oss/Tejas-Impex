@@ -15,8 +15,29 @@ export default function Orders() {
   const [cancelReason, setCancelReason] = useState('');
 
   useEffect(() => {
-    if (user) loadOrders();
-    else setLoading(false);
+    if (user) {
+      loadOrders();
+      
+      const channel = supabase
+        .channel('orders-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => loadOrders()
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   const loadOrders = async () => {
@@ -27,6 +48,7 @@ export default function Orders() {
         order_items(*, products(name, product_images(image_url)))
       `)
       .eq('user_id', user?.id)
+      .neq('order_status', 'cancelled')
       .order('created_at', { ascending: false });
     
     if (data) setOrders(data);
@@ -64,7 +86,6 @@ export default function Orders() {
       toast({ title: 'Order cancelled successfully' });
       setCancelOrderId(null);
       setCancelReason('');
-      loadOrders();
     }
   };
 
@@ -175,16 +196,24 @@ export default function Orders() {
                       <p className="text-2xl font-bold text-primary">₹{order.total}</p>
                     </div>
                   </div>
-                  {order.order_status !== 'cancelled' && order.order_status !== 'delivered' && (
+                  <div className="flex gap-2 mt-4">
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
-                      className="mt-4"
-                      onClick={() => setCancelOrderId(order.id)}
+                      asChild
                     >
-                      Cancel Order
+                      <Link to={`/order-tracking/${order.id}`}>Track Order</Link>
                     </Button>
-                  )}
+                    {order.order_status !== 'cancelled' && order.order_status !== 'delivered' && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setCancelOrderId(order.id)}
+                      >
+                        Cancel Order
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

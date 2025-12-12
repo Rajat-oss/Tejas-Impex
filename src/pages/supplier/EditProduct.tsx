@@ -282,13 +282,13 @@ export default function EditProduct() {
                       <label className="cursor-pointer">
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml"
                           className="hidden"
                           onChange={(e) => handleImageUpload(e.target.files?.[0] || null)}
                         />
                         <div className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90">
                           <Upload className="h-4 w-4" />
-                          Upload New Image
+                          {imagePreview ? 'Change Image' : 'Upload Image'}
                         </div>
                       </label>
                       {imagePreview && (

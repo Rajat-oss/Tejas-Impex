@@ -83,6 +83,7 @@ export default function Cart() {
         product_snapshot: item.products,
         quantity: item.quantity,
         price: item.products.price,
+        supplier_status: 'pending',
       });
     }
 
