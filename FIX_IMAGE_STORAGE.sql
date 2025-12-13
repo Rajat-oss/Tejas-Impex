@@ -1,36 +1,65 @@
--- Fix product images storage and policies
+-- Complete fix for image upload
 
--- 1. Ensure product-images bucket exists and is public
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('product-images', 'product-images', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
+-- 1. Update bucket to allow all image types
+UPDATE storage.buckets 
+SET 
+  public = true,
+  file_size_limit = 10485760,
+  allowed_mime_types = NULL
+WHERE id = 'product-images';
 
--- 2. Allow public access to view images
+-- 2. If bucket doesn't exist, create it
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('product-images', 'product-images', true, 10485760, NULL)
+ON CONFLICT (id) DO UPDATE 
+SET public = true, 
+    file_size_limit = 10485760,
+    allowed_mime_types = NULL;
+
+-- 3. Drop all existing policies
 DROP POLICY IF EXISTS "Public can view product images" ON storage.objects;
-CREATE POLICY "Public can view product images"
+DROP POLICY IF EXISTS "Authenticated users can upload product images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their product images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their product images" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can view product images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated can upload images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated can update images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated can delete images" ON storage.objects;
+
+-- 4. Create simple policies
+CREATE POLICY "Anyone can view product images"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'product-images');
 
--- 3. Allow authenticated users to upload images
-DROP POLICY IF EXISTS "Authenticated users can upload product images" ON storage.objects;
-CREATE POLICY "Authenticated users can upload product images"
+CREATE POLICY "Authenticated can upload images"
 ON storage.objects FOR INSERT
-WITH CHECK (
-  bucket_id = 'product-images' AND
-  auth.role() = 'authenticated'
-);
+TO authenticated
+WITH CHECK (bucket_id = 'product-images');
 
--- 4. Allow users to update their own images
-DROP POLICY IF EXISTS "Users can update their product images" ON storage.objects;
-CREATE POLICY "Users can update their product images"
+CREATE POLICY "Authenticated can update images"
 ON storage.objects FOR UPDATE
-USING (bucket_id = 'product-images' AND auth.role() = 'authenticated');
+TO authenticated
+USING (bucket_id = 'product-images');
 
--- 5. Allow users to delete their own images
-DROP POLICY IF EXISTS "Users can delete their product images" ON storage.objects;
-CREATE POLICY "Users can delete their product images"
+CREATE POLICY "Authenticated can delete images"
 ON storage.objects FOR DELETE
-USING (bucket_id = 'product-images' AND auth.role() = 'authenticated');
+TO authenticated
+USING (bucket_id = 'product-images');
 
--- Verify policies
-SELECT * FROM storage.buckets WHERE id = 'product-images';
+-- 5. Fix product_images table RLS
+ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can view product images" ON product_images;
+DROP POLICY IF EXISTS "Authenticated can insert product images" ON product_images;
+
+CREATE POLICY "Anyone can view product images"
+ON product_images FOR SELECT
+USING (true);
+
+CREATE POLICY "Authenticated can insert product images"
+ON product_images FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
+-- Verify
+SELECT id, name, public, file_size_limit, allowed_mime_types FROM storage.buckets WHERE id = 'product-images';

@@ -80,27 +80,51 @@ export default function AddProduct() {
 
   const handleImageUpload = (id: string, file: File | null) => {
     if (file) {
-      const preview = URL.createObjectURL(file);
-      updateProduct(id, 'image', file);
-      updateProduct(id, 'imagePreview', preview);
+      console.log('📸 Image selected:', file.name, 'Size:', file.size);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        console.log('✅ Image loaded to preview');
+        setProducts(prev => prev.map(p => 
+          p.id === id 
+            ? { ...p, image: file, imagePreview: reader.result as string }
+            : p
+        ));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const uploadImage = async (file: File, productId: string) => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${productId}-${Date.now()}.${fileExt}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+  const uploadImageToStorage = async (file: File, productId: string): Promise<string> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${productId}.${fileExt}`;
+      
+      console.log('📸 Uploading:', fileName, 'Size:', file.size, 'Type:', file.type);
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
-    if (uploadError) throw uploadError;
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(fileName);
+      if (uploadError) {
+        console.error('❌ Storage upload error:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+      
+      console.log('✅ Upload success:', uploadData);
+      
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
 
-    return publicUrl;
+      console.log('🔗 Public URL:', urlData.publicUrl);
+      return urlData.publicUrl;
+    } catch (err: any) {
+      console.error('❌ Upload exception:', err);
+      throw err;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,6 +139,7 @@ export default function AddProduct() {
           return;
         }
 
+        console.log('🚀 Creating product:', product.name);
         const slug = `${product.name}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         
         const { data: newProduct, error } = await supabase
@@ -137,26 +162,50 @@ export default function AddProduct() {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Product insert error:', error);
+          throw error;
+        }
 
+        console.log('✅ Product created:', newProduct.id);
+
+        console.log('🔍 Checking image:', product.image ? 'YES' : 'NO', product.image);
+        
         if (product.image && newProduct) {
+          console.log('📸 Has image, uploading...');
           try {
-            const imageUrl = await uploadImage(product.image, newProduct.id);
-            const { error: imageError } = await supabase.from('product_images').insert({
-              product_id: newProduct.id,
-              image_url: imageUrl,
-              sort_order: 0
-            });
-            if (imageError) console.error('Image insert error:', imageError);
-          } catch (imgErr) {
-            console.error('Image upload error:', imgErr);
+            const imageUrl = await uploadImageToStorage(product.image, newProduct.id);
+            console.log('✅ Image uploaded:', imageUrl);
+            console.log('💾 Inserting to product_images table...');
+            
+            const { data: imageData, error: imageError } = await supabase
+              .from('product_images')
+              .insert({
+                product_id: newProduct.id,
+                image_url: imageUrl,
+                sort_order: 0
+              })
+              .select();
+            
+            if (imageError) {
+              console.error('❌ Image DB insert error:', imageError);
+              toast({ title: 'Warning', description: `Product added but image failed: ${imageError.message}` });
+            } else {
+              console.log('✅ Image saved to DB:', imageData);
+            }
+          } catch (imgErr: any) {
+            console.error('❌ Image upload exception:', imgErr);
+            toast({ title: 'Warning', description: `Product added but image failed: ${imgErr.message}` });
           }
+        } else {
+          console.log('ℹ️ No image for this product');
         }
       }
 
       toast({ title: 'Success', description: `${products.length} product(s) added successfully!` });
       navigate('/supplier');
     } catch (error: any) {
+      console.error('❌ Submit error:', error);
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);

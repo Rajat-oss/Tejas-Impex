@@ -36,30 +36,45 @@ export default function ProductApprovals() {
   }, [isAdmin]);
 
   const loadProducts = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('products')
       .select('*')
       .eq('approval_status', 'pending')
       .order('created_at', { ascending: false });
     
+    if (error) {
+      console.error('❌ Load products error:', error);
+      return;
+    }
+
     if (!data || data.length === 0) {
+      console.log('ℹ️ No pending products');
       setProducts([]);
       return;
     }
 
+    console.log('✅ Products loaded:', data.length);
     const productIds = data.map(p => p.id);
     const supplierIds = data.map(p => p.supplier_id).filter(Boolean);
 
-    const [images, profiles] = await Promise.all([
-      supabase.from('product_images').select('product_id, image_url').in('product_id', productIds),
+    const [imagesResult, profilesResult] = await Promise.all([
+      supabase.from('product_images').select('*').in('product_id', productIds),
       supabase.from('profiles').select('id, full_name').in('id', supplierIds)
     ]);
 
-    const productsWithData = data.map(p => ({
-      ...p,
-      product_images: images.data?.filter(img => img.product_id === p.id) || [],
-      profiles: profiles.data?.find(prof => prof.id === p.supplier_id)
-    }));
+    console.log('📸 Images in DB:', imagesResult.data?.length || 0);
+    console.log('📸 All images:', imagesResult.data);
+    if (imagesResult.error) console.error('❌ Images error:', imagesResult.error);
+
+    const productsWithData = data.map(p => {
+      const images = imagesResult.data?.filter(img => img.product_id === p.id) || [];
+      console.log(`Product ${p.name} has ${images.length} images:`, images);
+      return {
+        ...p,
+        product_images: images,
+        profiles: profilesResult.data?.find(prof => prof.id === p.supplier_id)
+      };
+    });
 
     setProducts(productsWithData);
   };
@@ -113,14 +128,20 @@ export default function ProductApprovals() {
             {products.map((product) => (
               <div key={product.id} className="bg-card rounded-lg border p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                  {product.product_images?.[0]?.image_url ? (
+                  {product.product_images && product.product_images.length > 0 && product.product_images[0]?.image_url ? (
                     <img
                       src={product.product_images[0].image_url}
                       alt={product.name}
                       className="w-full sm:w-32 h-48 sm:h-32 object-cover rounded"
+                      onError={(e) => {
+                        console.error('Image load error:', product.product_images[0].image_url);
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23ddd" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+                      }}
                     />
                   ) : (
-                    <div className="w-full sm:w-32 h-48 sm:h-32 bg-secondary rounded" />
+                    <div className="w-full sm:w-32 h-48 sm:h-32 bg-secondary rounded flex items-center justify-center text-xs text-muted-foreground">
+                      No Image
+                    </div>
                   )}
                   
                   <div className="flex-1 min-w-0">
