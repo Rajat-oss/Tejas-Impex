@@ -32,8 +32,6 @@ export default function ProductApprovals() {
           table: 'products'
         },
         (payload) => {
-          console.log('Product updated:', payload);
-          // Remove product from list if status changed
           if (payload.new.approval_status !== 'pending') {
             setProducts(prev => prev.filter(p => p.id !== payload.new.id));
           }
