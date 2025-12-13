@@ -32,11 +32,19 @@ export default function SupplierDashboard() {
   const loadSupplierProducts = async () => {
     const { data } = await supabase
       .from('products')
-      .select('*, images:product_images(*), category:categories(name), brand:brands(name)')
+      .select('*, product_images(*), categories(name), brands(name)')
       .eq('supplier_id', user?.id)
       .order('created_at', { ascending: false });
     
-    if (data) setProducts(data);
+    if (data) {
+      const mapped = data.map(p => ({
+        ...p,
+        images: p.product_images,
+        category: p.categories,
+        brand: p.brands
+      }));
+      setProducts(mapped);
+    }
   };
 
   const handleDelete = async (productId: string) => {

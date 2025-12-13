@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,6 +33,7 @@ export default function AddProduct() {
   const [products, setProducts] = useState<ProductRow[]>([
     { id: crypto.randomUUID(), name: '', category_id: '', brand_id: '', weight: '', sku: '', stock_quantity: '', price: '', currency: 'INR', discount_percent: '0', image: null, imagePreview: '' }
   ]);
+  const fileRefs = useRef<Map<string, File>>(new Map());
 
   const skuOptions = ['PCS', 'KG', 'GM', 'LTR', 'MTR', 'BOX', 'CTN', 'SET', 'PAIR', 'DOZEN'];
 
@@ -80,7 +81,11 @@ export default function AddProduct() {
 
   const handleImageUpload = (id: string, file: File | null) => {
     if (file) {
-      console.log('📸 Image selected:', file.name, 'Size:', file.size);
+      console.log('📸 Image selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+      console.log('📸 File instanceof File:', file instanceof File);
+      console.log('📸 File instanceof Blob:', file instanceof Blob);
+      console.log('📸 File constructor:', file.constructor.name);
+      fileRefs.current.set(id, file);
       const reader = new FileReader();
       reader.onloadend = () => {
         console.log('✅ Image loaded to preview');
@@ -90,41 +95,54 @@ export default function AddProduct() {
             : p
         ));
       };
+      reader.onerror = (error) => {
+        console.error('❌ FileReader error:', error);
+        toast({ title: 'Error', description: 'Failed to read image file', variant: 'destructive' });
+      };
       reader.readAsDataURL(file);
     }
   };
 
   const uploadImageToStorage = async (file: File, productId: string): Promise<string> => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${productId}.${fileExt}`;
-      
-      console.log('📸 Uploading:', fileName, 'Size:', file.size, 'Type:', file.type);
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('❌ Storage upload error:', uploadError);
-        throw new Error(`Upload failed: ${uploadError.message}`);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${productId}.${fileExt}`;
+    
+    console.log('📸 Uploading:', fileName, 'Size:', file.size, 'Type:', file.type);
+    
+    // Get session token
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+    
+    // Use fetch API directly to avoid serialization issues
+    const formData = new FormData();
+    formData.append('file', file, fileName);
+    
+    const response = await fetch(
+      `${supabase.storage.url}/object/product-images/${fileName}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: file
       }
-      
-      console.log('✅ Upload success:', uploadData);
-      
-      const { data: urlData } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
+    );
 
-      console.log('🔗 Public URL:', urlData.publicUrl);
-      return urlData.publicUrl;
-    } catch (err: any) {
-      console.error('❌ Upload exception:', err);
-      throw err;
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('❌ Storage upload error:', error);
+      throw new Error(`Upload failed: ${error}`);
     }
+    
+    const uploadData = await response.json();
+    console.log('✅ Upload success:', uploadData);
+    
+    const { data: urlData } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(fileName);
+
+    console.log('🔗 Public URL:', urlData.publicUrl);
+    return urlData.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -169,12 +187,13 @@ export default function AddProduct() {
 
         console.log('✅ Product created:', newProduct.id);
 
-        console.log('🔍 Checking image:', product.image ? 'YES' : 'NO', product.image);
+        const imageFile = fileRefs.current.get(product.id);
+        console.log('🔍 Checking image:', imageFile ? 'YES' : 'NO', imageFile);
         
-        if (product.image && newProduct) {
+        if (imageFile && newProduct) {
           console.log('📸 Has image, uploading...');
           try {
-            const imageUrl = await uploadImageToStorage(product.image, newProduct.id);
+            const imageUrl = await uploadImageToStorage(imageFile, newProduct.id);
             console.log('✅ Image uploaded:', imageUrl);
             console.log('💾 Inserting to product_images table...');
             
@@ -353,7 +372,7 @@ export default function AddProduct() {
                         <label className="cursor-pointer">
                           <input
                             type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml"
+                            accept="image/*"
                             className="hidden"
                             onChange={(e) => handleImageUpload(product.id, e.target.files?.[0] || null)}
                           />

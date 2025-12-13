@@ -38,7 +38,7 @@ export default function ProductApprovals() {
   const loadProducts = async () => {
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('*, product_images(*)')
       .eq('approval_status', 'pending')
       .order('created_at', { ascending: false });
     
@@ -53,30 +53,19 @@ export default function ProductApprovals() {
       return;
     }
 
-    console.log('✅ Products loaded:', data.length);
-    const productIds = data.map(p => p.id);
-    const supplierIds = data.map(p => p.supplier_id).filter(Boolean);
+    const supplierIds = [...new Set(data.map(p => p.supplier_id).filter(Boolean))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', supplierIds);
 
-    const [imagesResult, profilesResult] = await Promise.all([
-      supabase.from('product_images').select('*').in('product_id', productIds),
-      supabase.from('profiles').select('id, full_name').in('id', supplierIds)
-    ]);
+    const productsWithProfiles = data.map(p => ({
+      ...p,
+      profiles: profiles?.find(prof => prof.id === p.supplier_id)
+    }));
 
-    console.log('📸 Images in DB:', imagesResult.data?.length || 0);
-    console.log('📸 All images:', imagesResult.data);
-    if (imagesResult.error) console.error('❌ Images error:', imagesResult.error);
-
-    const productsWithData = data.map(p => {
-      const images = imagesResult.data?.filter(img => img.product_id === p.id) || [];
-      console.log(`Product ${p.name} has ${images.length} images:`, images);
-      return {
-        ...p,
-        product_images: images,
-        profiles: profilesResult.data?.find(prof => prof.id === p.supplier_id)
-      };
-    });
-
-    setProducts(productsWithData);
+    console.log('✅ Products loaded:', productsWithProfiles.length);
+    setProducts(productsWithProfiles);
   };
 
   const handleApproval = async (productId: string, status: 'approved' | 'rejected') => {
