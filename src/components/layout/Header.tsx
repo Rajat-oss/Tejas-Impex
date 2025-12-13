@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, User, Heart, ShoppingCart, Menu, X, LogOut } from 'lucide-react';
+import { Search, User, Heart, ShoppingCart, Menu, X, LogOut, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,9 +26,33 @@ const navLinks = [
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDark, setIsDark] = useState(false);
   const navigate = useNavigate();
   const { user, profile, isAdmin, isSupplier, isFinance, signOut } = useAuth();
   const { itemCount } = useCart();
+
+  useEffect(() => {
+    const theme = localStorage.getItem('theme');
+    const isDarkMode = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setIsDark(isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    if (newIsDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +67,7 @@ export function Header() {
   };
 
   return (
+    <>
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       {/* Top bar */}
       <div className="bg-primary text-primary-foreground">
@@ -170,6 +195,16 @@ export function Header() {
               </Button>
             )}
 
+            {/* Theme toggle - Desktop */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden md:flex"
+              onClick={toggleTheme}
+            >
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+
             {/* Mobile menu toggle */}
             <Button
               variant="ghost"
@@ -215,38 +250,110 @@ export function Header() {
         </div>
       </nav>
 
-      {/* Mobile navigation */}
+    </header>
+
+      {/* Overlay */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[100] md:hidden"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile navigation - Right Sidebar */}
       <div
         className={cn(
-          'fixed inset-0 top-[calc(var(--header-height,140px))] z-50 bg-white dark:bg-gray-900 md:hidden transition-transform duration-300',
+          'fixed right-0 top-0 bottom-0 h-screen w-72 z-[101] bg-white dark:bg-gray-900 md:hidden transition-transform duration-300 shadow-2xl border-l border-border',
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
-        <nav className="container py-6">
-          <ul className="flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <li key={link.href}>
+        <div className="h-full flex flex-col">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-4 border-b border-border bg-white dark:bg-gray-900">
+            <h2 className="font-display text-lg font-bold text-primary">Menu</h2>
+            <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Sidebar Content */}
+          <nav className="flex-1 overflow-y-auto p-4 bg-white dark:bg-gray-900">
+            <ul className="flex flex-col gap-1">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="block py-3 px-4 text-base font-medium text-foreground hover:bg-secondary hover:text-primary transition-all rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              
+              <li className="border-t border-border my-3"></li>
+              
+              <li>
                 <Link
-                  to={link.href}
-                  className="block py-2 text-lg font-medium text-foreground hover:text-primary transition-colors"
+                  to="/about"
+                  className="block py-3 px-4 text-base text-muted-foreground hover:bg-secondary hover:text-primary transition-all rounded-lg"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {link.label}
+                  About Us
                 </Link>
               </li>
-            ))}
-            <li className="border-t pt-4 mt-2">
-              <Link
-                to="/about"
-                className="block py-2 text-muted-foreground hover:text-primary"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About Us
-              </Link>
-            </li>
-          </ul>
-        </nav>
+              
+              {isSupplier && (
+                <li>
+                  <Link
+                    to="/supplier/orders"
+                    className="block py-3 px-4 text-base text-muted-foreground hover:bg-secondary hover:text-primary transition-all rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Track Orders
+                  </Link>
+                </li>
+              )}
+              
+              {isAdmin && (
+                <li>
+                  <Link
+                    to="/admin"
+                    className="block py-3 px-4 text-base font-medium text-primary hover:bg-secondary transition-all rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Admin Panel
+                  </Link>
+                </li>
+              )}
+              
+              {isSupplier && (
+                <li>
+                  <Link
+                    to="/supplier"
+                    className="block py-3 px-4 text-base font-medium text-primary hover:bg-secondary transition-all rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Supplier Dashboard
+                  </Link>
+                </li>
+              )}
+              
+              <li className="border-t border-border my-3"></li>
+              
+              <li>
+                <button
+                  onClick={toggleTheme}
+                  className="w-full flex items-center gap-3 py-3 px-4 text-base text-foreground hover:bg-secondary transition-all rounded-lg"
+                >
+                  {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                  <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
-    </header>
+    </>
   );
 }
