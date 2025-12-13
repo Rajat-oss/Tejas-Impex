@@ -106,50 +106,51 @@ export default function ProductDetail() {
 
   return (
     <Layout>
-      <div className="container py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="animate-in fade-in slide-in-from-left-8 duration-700">
+      <div className="container py-4 px-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="bg-card rounded-xl border p-4 sm:p-6">
             {product.product_images?.[0]?.image_url ? (
               <img
                 src={product.product_images[0].image_url}
                 alt={product.name}
-                className="w-full aspect-square object-cover rounded-lg"
+                className="w-full aspect-square object-cover rounded-lg shadow-md"
               />
             ) : (
               <div className="w-full aspect-square bg-secondary rounded-lg" />
             )}
           </div>
           
-          <div className="animate-in fade-in slide-in-from-right-8 duration-700">
-            <h1 className="font-display text-4xl font-bold mb-2">{product.name}</h1>
-            {product.brands && (
-              <p className="text-muted-foreground mb-4">by {product.brands.name}</p>
-            )}
+          <div className="space-y-4 sm:space-y-6">
+            <div>
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{product.name}</h1>
+              {product.brands && (
+                <p className="text-sm sm:text-base text-muted-foreground">by {product.brands.name}</p>
+              )}
+            </div>
             
-            <div className="flex items-center gap-4 mb-6">
-              <p className="text-4xl font-bold text-primary">₹{product.admin_price || product.price}</p>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <p className="text-3xl sm:text-4xl font-bold text-primary">₹{product.admin_price || product.price}</p>
               {product.discount_percent > 0 && (
-                <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-semibold">
+                <span className="bg-red-100 text-red-800 px-3 py-1.5 rounded-lg text-sm font-semibold">
                   {product.discount_percent}% OFF
                 </span>
               )}
             </div>
 
             {product.description && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-2">Description</h2>
-                <p className="text-muted-foreground">{product.description}</p>
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h2 className="text-lg sm:text-xl font-semibold mb-2">Description</h2>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{product.description}</p>
               </div>
             )}
 
-            {product.categories && (
-              <p className="text-sm text-muted-foreground mb-4">
-                Category: {product.categories.name}
-              </p>
-            )}
-
-            <div className="flex items-center gap-2 mb-4">
-              <span className={`px-3 py-1 rounded text-sm font-semibold ${
+            <div className="flex flex-wrap gap-3">
+              {product.categories && (
+                <span className="bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-sm font-medium">
+                  {product.categories.name}
+                </span>
+              )}
+              <span className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${
                 product.stock_quantity > 0 
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-red-100 text-red-800'
@@ -159,20 +160,23 @@ export default function ProductDetail() {
             </div>
 
             {!isSupplier && (
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <Button
                   onClick={addToCart}
                   disabled={product.stock_quantity === 0}
-                  className="flex-1"
+                  className="flex-1 h-12 text-base"
+                  size="lg"
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  <ShoppingCart className="h-5 w-5 mr-2" />
                   Add to Cart
                 </Button>
                 <Button
                   variant="outline"
                   onClick={toggleWishlist}
+                  className="h-12 sm:w-12"
+                  size="lg"
                 >
-                  <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
             )}
@@ -180,26 +184,26 @@ export default function ProductDetail() {
         </div>
 
         {similarProducts.length > 0 && (
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">Similar Products</h2>
-            <div className="grid md:grid-cols-4 gap-6">
+          <div className="mt-12 sm:mt-16">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Similar Products</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {similarProducts.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-card rounded-lg border p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                  className="bg-card rounded-lg border p-3 sm:p-4 hover:shadow-lg transition-all cursor-pointer group"
                   onClick={() => navigate(`/product/${item.id}`)}
                 >
                   {item.product_images?.[0]?.image_url ? (
                     <img
                       src={item.product_images[0].image_url}
                       alt={item.name}
-                      className="aspect-square object-cover rounded-md mb-4"
+                      className="aspect-square object-cover rounded-md mb-3 group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="aspect-square bg-secondary rounded-md mb-4" />
+                    <div className="aspect-square bg-secondary rounded-md mb-3" />
                   )}
-                  <h3 className="font-semibold mb-2">{item.name}</h3>
-                  <p className="font-bold text-primary">₹{item.admin_price || item.price}</p>
+                  <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 line-clamp-2">{item.name}</h3>
+                  <p className="font-bold text-primary text-sm sm:text-base">₹{item.admin_price || item.price}</p>
                 </div>
               ))}
             </div>

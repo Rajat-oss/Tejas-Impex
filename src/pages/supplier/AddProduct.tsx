@@ -12,6 +12,7 @@ interface ProductRow {
   id: string;
   name: string;
   category_id: string;
+  brand_id: string;
   weight: string;
   sku: string;
   stock_quantity: string;
@@ -30,7 +31,7 @@ export default function AddProduct() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([
-    { id: crypto.randomUUID(), name: '', category_id: '', weight: '', sku: '', stock_quantity: '', price: '', currency: 'INR', discount_percent: '0', image: null, imagePreview: '' }
+    { id: crypto.randomUUID(), name: '', category_id: '', brand_id: '', weight: '', sku: '', stock_quantity: '', price: '', currency: 'INR', discount_percent: '0', image: null, imagePreview: '' }
   ]);
 
   const skuOptions = ['PCS', 'KG', 'GM', 'LTR', 'MTR', 'BOX', 'CTN', 'SET', 'PAIR', 'DOZEN'];
@@ -44,17 +45,17 @@ export default function AddProduct() {
   }, [isSupplier, navigate]);
 
   const loadCategoriesAndBrands = async () => {
-    const { data: categoriesRes } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('name');
+    const [categoriesRes, brandsRes] = await Promise.all([
+      supabase.from('categories').select('*').eq('is_active', true).order('name'),
+      supabase.from('brands').select('*').eq('is_active', true).order('name')
+    ]);
     
-    if (categoriesRes) setCategories(categoriesRes);
+    if (categoriesRes.data) setCategories(categoriesRes.data);
+    if (brandsRes.data) setBrands(brandsRes.data);
   };
 
   const addRow = () => {
-    setProducts([...products, { id: crypto.randomUUID(), name: '', category_id: '', weight: '', sku: '', stock_quantity: '', price: '', currency: 'INR', discount_percent: '0', image: null, imagePreview: '' }]);
+    setProducts([...products, { id: crypto.randomUUID(), name: '', category_id: '', brand_id: '', weight: '', sku: '', stock_quantity: '', price: '', currency: 'INR', discount_percent: '0', image: null, imagePreview: '' }]);
   };
 
   const removeRow = (id: string) => {
@@ -125,6 +126,7 @@ export default function AddProduct() {
             currency: product.currency,
             stock_quantity: parseInt(product.stock_quantity),
             category_id: product.category_id || null,
+            brand_id: product.brand_id || null,
             weight: product.weight || null,
             discount_percent: parseInt(product.discount_percent),
             supplier_id: user?.id,
@@ -177,7 +179,8 @@ export default function AddProduct() {
               <thead className="bg-muted">
                 <tr>
                   <th className="border p-2 text-left text-sm font-medium min-w-[150px]">Name *</th>
-                  <th className="border p-2 text-left text-sm font-medium min-w-[120px]">Category</th>
+                  {categories.length > 0 && <th className="border p-2 text-left text-sm font-medium min-w-[120px]">Category</th>}
+                  {brands.length > 0 && <th className="border p-2 text-left text-sm font-medium min-w-[120px]">Brand</th>}
                   <th className="border p-2 text-left text-sm font-medium min-w-[80px]">Weight (per)</th>
                   <th className="border p-2 text-left text-sm font-medium min-w-[80px]">Quantity *</th>
                   <th className="border p-2 text-left text-sm font-medium min-w-[80px]">SKU *</th>
@@ -200,18 +203,34 @@ export default function AddProduct() {
                         required
                       />
                     </td>
-                    <td className="border p-1">
-                      <select
-                        className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-primary rounded"
-                        value={product.category_id}
-                        onChange={(e) => updateProduct(product.id, 'category_id', e.target.value)}
-                      >
-                        <option value="">Select</option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>{cat.name}</option>
-                        ))}
-                      </select>
-                    </td>
+                    {categories.length > 0 && (
+                      <td className="border p-1">
+                        <select
+                          className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-primary rounded"
+                          value={product.category_id}
+                          onChange={(e) => updateProduct(product.id, 'category_id', e.target.value)}
+                        >
+                          <option value="">Select</option>
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          ))}
+                        </select>
+                      </td>
+                    )}
+                    {brands.length > 0 && (
+                      <td className="border p-1">
+                        <select
+                          className="w-full px-2 py-1 border-0 focus:ring-1 focus:ring-primary rounded"
+                          value={product.brand_id}
+                          onChange={(e) => updateProduct(product.id, 'brand_id', e.target.value)}
+                        >
+                          <option value="">Select</option>
+                          {brands.map((brand) => (
+                            <option key={brand.id} value={brand.id}>{brand.name}</option>
+                          ))}
+                        </select>
+                      </td>
+                    )}
                     <td className="border p-1">
                       <input
                         type="text"

@@ -96,60 +96,60 @@ export default function ProductApprovals() {
 
   return (
     <Layout>
-      <div className="container py-8">
-        <h1 className="font-display text-4xl font-bold mb-6">Product Approvals</h1>
+      <div className="container py-4 px-4 sm:py-8">
+        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">Product Approvals</h1>
 
         {products.length === 0 ? (
-          <div className="bg-card rounded-lg border p-8 text-center text-muted-foreground">
+          <div className="bg-card rounded-lg border p-6 sm:p-8 text-center text-muted-foreground">
             No pending products
           </div>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-4 sm:gap-6">
             {products.map((product) => (
-              <div key={product.id} className="bg-card rounded-lg border p-6">
-                <div className="flex gap-6">
+              <div key={product.id} className="bg-card rounded-lg border p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   {product.product_images?.[0]?.image_url ? (
                     <img
                       src={product.product_images[0].image_url}
                       alt={product.name}
-                      className="w-32 h-32 object-cover rounded"
+                      className="w-full sm:w-32 h-48 sm:h-32 object-cover rounded"
                     />
                   ) : (
-                    <div className="w-32 h-32 bg-secondary rounded" />
+                    <div className="w-full sm:w-32 h-48 sm:h-32 bg-secondary rounded" />
                   )}
                   
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-2 break-words">{product.name}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                       Supplier: {product.profiles?.full_name || 'N/A'}
                     </p>
-                    <p className="text-sm mb-4">{product.description}</p>
+                    <p className="text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">{product.description}</p>
                     
-                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                       <div>
-                        <label className="text-sm font-medium">Supplier Price</label>
-                        <p className="text-lg font-bold text-muted-foreground">₹{product.price}</p>
+                        <label className="text-xs sm:text-sm font-medium">Supplier Price</label>
+                        <p className="text-base sm:text-lg font-bold text-muted-foreground">₹{product.price}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium">Supplier Stock</label>
-                        <p className="text-lg font-bold text-muted-foreground">{product.stock_quantity}</p>
+                        <label className="text-xs sm:text-sm font-medium">Supplier Stock</label>
+                        <p className="text-base sm:text-lg font-bold text-muted-foreground">{product.stock_quantity}</p>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium block mb-1">Set Stock Quantity</label>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs sm:text-sm font-medium block mb-1">Set Stock Quantity</label>
                         <input
                           type="number"
                           defaultValue={product.stock_quantity}
                           data-stock-id={product.id}
-                          className="w-full px-3 py-2 rounded border bg-background"
+                          className="w-full px-3 py-2 rounded border bg-background text-sm"
                           placeholder="Stock"
                         />
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
                         onClick={() => handleApproval(product.id, 'approved')}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700 w-full sm:w-auto text-sm"
                       >
                         <Check className="h-4 w-4 mr-2" />
                         Send to Finance
@@ -157,6 +157,7 @@ export default function ProductApprovals() {
                       <Button
                         onClick={() => handleApproval(product.id, 'rejected')}
                         variant="destructive"
+                        className="w-full sm:w-auto text-sm"
                       >
                         <X className="h-4 w-4 mr-2" />
                         Reject

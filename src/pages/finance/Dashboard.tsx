@@ -164,37 +164,37 @@ export default function FinanceDashboard() {
 
   return (
     <Layout>
-      <div className="container py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <DollarSign className="h-10 w-10 text-primary" />
-          <h1 className="font-display text-4xl font-bold">Finance Dashboard</h1>
+      <div className="container py-4 px-4 sm:py-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+          <DollarSign className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">Finance Dashboard</h1>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-card rounded-lg border p-6">
-            <Package className="h-8 w-8 text-primary mb-2" />
-            <h3 className="font-semibold text-2xl">{products.length}</h3>
-            <p className="text-muted-foreground">Pending Products</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-card rounded-lg border p-4 sm:p-6">
+            <Package className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2" />
+            <h3 className="font-semibold text-xl sm:text-2xl">{products.length}</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">Pending Products</p>
           </div>
-          <div className="bg-card rounded-lg border p-6">
-            <TrendingUp className="h-8 w-8 text-green-500 mb-2" />
-            <h3 className="font-semibold text-2xl">0</h3>
-            <p className="text-muted-foreground">Approved Today</p>
+          <div className="bg-card rounded-lg border p-4 sm:p-6">
+            <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 mb-2" />
+            <h3 className="font-semibold text-xl sm:text-2xl">0</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">Approved Today</p>
           </div>
-          <div className="bg-card rounded-lg border p-6">
-            <DollarSign className="h-8 w-8 text-blue-500 mb-2" />
-            <h3 className="font-semibold text-2xl">₹0</h3>
-            <p className="text-muted-foreground">Total Revenue</p>
+          <div className="bg-card rounded-lg border p-4 sm:p-6 sm:col-span-2 md:col-span-1">
+            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mb-2" />
+            <h3 className="font-semibold text-xl sm:text-2xl">₹0</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">Total Revenue</p>
           </div>
         </div>
 
-        <div className="bg-card rounded-lg border p-6">
-          <h2 className="text-2xl font-bold mb-6">Products Awaiting Price Approval</h2>
+        <div className="bg-card rounded-lg border p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6">Products Awaiting Price Approval</h2>
           
           {products.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No products pending approval</p>
+            <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm sm:text-base">No products pending approval</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {products.map((product) => (
                 <ProductPriceCard 
                   key={product.id} 
@@ -233,31 +233,31 @@ function ProductPriceCard({
   };
 
   return (
-    <div className="border rounded-lg p-4 flex gap-4">
+    <div className="border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
       <img 
         src={product.image_url} 
         alt={product.name}
-        className="w-24 h-24 object-cover rounded"
+        className="w-full sm:w-20 md:w-24 h-40 sm:h-20 md:h-24 object-cover rounded"
       />
-      <div className="flex-1">
-        <h3 className="font-semibold text-lg">{product.name}</h3>
-        <p className="text-sm text-muted-foreground mb-2">{product.description?.substring(0, 100)}...</p>
-        <div className="flex gap-4 text-sm">
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-base sm:text-lg break-words">{product.name}</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">{product.description?.substring(0, 100)}...</p>
+        <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 text-xs sm:text-sm">
           <span>Supplier: <strong>{product.supplier_name}</strong></span>
           <span>Supplier Price: <strong>{formatCurrency(product.supplier_price || 0)}</strong></span>
         </div>
       </div>
-      <div className="flex flex-col gap-2 min-w-[200px]">
-        <label className="text-sm font-medium">Set Final Price</label>
+      <div className="flex flex-col gap-2 w-full sm:w-auto sm:min-w-[180px] md:min-w-[200px]">
+        <label className="text-xs sm:text-sm font-medium">Set Final Price</label>
         <input
           type="number"
           value={newPrice}
           onChange={(e) => handlePriceChange(e.target.value)}
-          className="px-3 py-2 rounded-md border bg-background"
+          className="px-3 py-2 rounded-md border bg-background text-sm"
           placeholder="Enter price"
           step="0.01"
         />
-        <div className="text-sm">
+        <div className="text-xs sm:text-sm">
           Margin: <span className={margin >= 0 ? 'text-green-600' : 'text-red-600'}>
             {margin}%
           </span>
@@ -265,7 +265,7 @@ function ProductPriceCard({
         <Button 
           onClick={() => onUpdatePrice(product.id, parseFloat(newPrice))}
           disabled={!newPrice || parseFloat(newPrice) <= 0}
-          className="w-full"
+          className="w-full text-sm"
         >
           Approve & Set Price
         </Button>

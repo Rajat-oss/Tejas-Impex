@@ -218,7 +218,7 @@ export function Header() {
       {/* Mobile navigation */}
       <div
         className={cn(
-          'fixed inset-0 top-[calc(var(--header-height,140px))] z-50 bg-background md:hidden transition-transform duration-300',
+          'fixed inset-0 top-[calc(var(--header-height,140px))] z-50 bg-white dark:bg-gray-900 md:hidden transition-transform duration-300',
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
