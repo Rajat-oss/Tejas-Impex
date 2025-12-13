@@ -367,6 +367,7 @@ export type Database = {
       }
       products: {
         Row: {
+          admin_price: number | null
           average_rating: number | null
           brand_id: string | null
           category_id: string | null
@@ -387,6 +388,7 @@ export type Database = {
           weight: string | null
         }
         Insert: {
+          admin_price?: number | null
           average_rating?: number | null
           brand_id?: string | null
           category_id?: string | null
@@ -407,6 +409,7 @@ export type Database = {
           weight?: string | null
         }
         Update: {
+          admin_price?: number | null
           average_rating?: number | null
           brand_id?: string | null
           category_id?: string | null

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 const footerLinks = {
   shop: [
@@ -25,6 +26,8 @@ const footerLinks = {
 };
 
 export function Footer() {
+  const { user } = useAuth();
+  
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container py-12">
@@ -119,6 +122,15 @@ export function Footer() {
                 <span>hello@tejasimpex.com</span>
               </li>
             </ul>
+            {!user && (
+              <div className="mt-4">
+                <Link to="/admin-access">
+                  <Button variant="secondary" size="sm" className="w-full">
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 

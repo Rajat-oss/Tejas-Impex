@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +24,7 @@ export default function AdminProducts() {
   const { toast } = useToast();
   const [products, setProducts] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingPrice, setEditingPrice] = useState<{ id: string; adminPrice: string } | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -41,9 +42,25 @@ export default function AdminProducts() {
   const loadProducts = async () => {
     const { data } = await supabase
       .from('products')
-      .select('*, product_images(image_url)')
+      .select('*, product_images(image_url), profiles!products_supplier_id_fkey(full_name)')
       .order('created_at', { ascending: false });
     if (data) setProducts(data);
+  };
+
+  const updateAdminPrice = async (productId: string, adminPrice: string) => {
+    const priceValue = adminPrice.trim() === '' ? null : parseFloat(adminPrice);
+    const { error } = await supabase
+      .from('products')
+      .update({ admin_price: priceValue })
+      .eq('id', productId);
+    
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Success', description: 'Admin price updated successfully' });
+      setEditingPrice(null);
+      loadProducts();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -182,8 +199,11 @@ export default function AdminProducts() {
               <tr>
                 <th className="text-left p-4">Image</th>
                 <th className="text-left p-4">Name</th>
-                <th className="text-left p-4">Price</th>
+                <th className="text-left p-4">Supplier</th>
+                <th className="text-left p-4">Supplier Price</th>
+                <th className="text-left p-4">Admin Price</th>
                 <th className="text-left p-4">Stock</th>
+                <th className="text-left p-4">Status</th>
                 <th className="text-right p-4">Actions</th>
               </tr>
             </thead>
@@ -204,8 +224,62 @@ export default function AdminProducts() {
                     )}
                   </td>
                   <td className="p-4">{product.name}</td>
+                  <td className="p-4">
+                    <span className="text-sm text-muted-foreground">
+                      {product.profiles?.full_name || 'N/A'}
+                    </span>
+                  </td>
                   <td className="p-4">₹{product.price}</td>
+                  <td className="p-4">
+                    {editingPrice?.id === product.id ? (
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editingPrice.adminPrice}
+                          onChange={(e) => setEditingPrice({ ...editingPrice, adminPrice: e.target.value })}
+                          className="w-24 px-2 py-1 rounded border bg-background"
+                          placeholder="Price"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => updateAdminPrice(product.id, editingPrice.adminPrice)}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingPrice(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 items-center">
+                        <span className={product.admin_price ? 'font-bold text-primary' : 'text-muted-foreground'}>
+                          {product.admin_price ? `₹${product.admin_price}` : 'Not set'}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingPrice({ id: product.id, adminPrice: product.admin_price?.toString() || '' })}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </td>
                   <td className="p-4">{product.stock_quantity}</td>
+                  <td className="p-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      product.approval_status === 'approved' ? 'bg-green-100 text-green-800' :
+                      product.approval_status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {product.approval_status || 'pending'}
+                    </span>
+                  </td>
                   <td className="p-4 text-right">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -239,7 +313,7 @@ export default function AdminProducts() {
               ))}
               {products.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
                     No products yet. Add your first product!
                   </td>
                 </tr>

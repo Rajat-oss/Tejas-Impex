@@ -66,6 +66,11 @@ export default function AdminDashboard() {
             <h3 className="font-semibold text-xl mb-2">Supplier Approvals</h3>
             <p className="text-muted-foreground">Approve or reject supplier requests</p>
           </Link>
+          <Link to="/admin/product-approvals" className="bg-card rounded-lg border p-6 hover:border-primary transition-colors">
+            <Package className="h-6 w-6 text-primary mb-2" />
+            <h3 className="font-semibold text-xl mb-2">Product Approvals</h3>
+            <p className="text-muted-foreground">Review and approve supplier products</p>
+          </Link>
           <div className="bg-card rounded-lg border p-6 opacity-50">
             <ShoppingBag className="h-6 w-6 text-muted-foreground mb-2" />
             <h3 className="font-semibold text-xl mb-2">Manage Orders</h3>

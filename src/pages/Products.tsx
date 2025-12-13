@@ -133,10 +133,19 @@ export default function Products() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-bold text-primary">
-                      {getCurrencySymbol(product.currency)}{product.price}
+                      {getCurrencySymbol(product.currency)}{product.admin_price || product.price}
                     </p>
-                    {isAdmin && product.currency !== 'INR' && (
-                      <Badge variant="outline" className="text-xs mt-1">{product.currency}</Badge>
+                    {isAdmin && (
+                      <div className="flex flex-col gap-1">
+                        {product.admin_price && (
+                          <p className="text-xs text-muted-foreground line-through">
+                            Supplier: {getCurrencySymbol(product.currency)}{product.price}
+                          </p>
+                        )}
+                        {product.currency !== 'INR' && (
+                          <Badge variant="outline" className="text-xs">{product.currency}</Badge>
+                        )}
+                      </div>
                     )}
                   </div>
                   {!isSupplier && (

@@ -53,7 +53,7 @@ export default function Cart() {
     loadCart();
   };
 
-  const total = cartItems.reduce((sum, item) => sum + (item.products?.price || 0) * item.quantity, 0);
+  const total = cartItems.reduce((sum, item) => sum + (item.products?.admin_price || item.products?.price || 0) * item.quantity, 0);
   const shippingCost = total > 999 ? 0 : 50;
   const finalTotal = total + shippingCost;
 
@@ -82,7 +82,7 @@ export default function Cart() {
         product_id: item.product_id,
         product_snapshot: item.products,
         quantity: item.quantity,
-        price: item.products.price,
+        price: item.products.admin_price || item.products.price,
         supplier_status: 'pending',
       });
     }
@@ -246,7 +246,7 @@ export default function Cart() {
                       {cartItems.map((item) => (
                         <div key={item.id} className="flex justify-between text-sm mb-1">
                           <span>{item.products?.name} x {item.quantity}</span>
-                          <span>₹{(item.products?.price * item.quantity).toFixed(2)}</span>
+                          <span>₹{((item.products?.admin_price || item.products?.price) * item.quantity).toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
@@ -298,7 +298,7 @@ export default function Cart() {
                   )}
                   <div className="flex-1">
                     <h3 className="font-semibold">{item.products?.name}</h3>
-                    <p className="text-primary font-bold">₹{item.products?.price}</p>
+                    <p className="text-primary font-bold">₹{item.products?.admin_price || item.products?.price}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <Button size="sm" variant="outline" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                         <Minus className="h-4 w-4" />

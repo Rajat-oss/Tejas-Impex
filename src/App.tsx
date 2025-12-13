@@ -18,6 +18,7 @@ import Brands from "./pages/Brands";
 import BrandDetail from "./pages/BrandDetail";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import AdminLogin from "./pages/AdminLogin";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Orders from "./pages/Orders";
@@ -27,6 +28,7 @@ import AdminBrands from "./pages/admin/Brands";
 import AdminCategories from "./pages/admin/Categories";
 import AdminSupplierApprovals from "./pages/admin/SupplierApprovals";
 import AdminSupplierDetail from "./pages/admin/SupplierDetail";
+import AdminProductApprovals from "./pages/admin/ProductApprovals";
 import SupplierDashboard from "./pages/SupplierDashboard";
 import SupplierPending from "./pages/SupplierPending";
 import SupplierAddProduct from "./pages/supplier/AddProduct";
@@ -62,6 +64,7 @@ const App = () => (
               <Route path="/brands/:slug" element={<BrandDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/admin-access" element={<AdminLogin />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/orders" element={<Orders />} />
@@ -73,6 +76,7 @@ const App = () => (
               <Route path="/admin/categories" element={<ProtectedRoute requireAdmin><AdminCategories /></ProtectedRoute>} />
               <Route path="/admin/suppliers" element={<ProtectedRoute requireAdmin><AdminSupplierApprovals /></ProtectedRoute>} />
               <Route path="/admin/suppliers/:id" element={<ProtectedRoute requireAdmin><AdminSupplierDetail /></ProtectedRoute>} />
+              <Route path="/admin/product-approvals" element={<ProtectedRoute requireAdmin><AdminProductApprovals /></ProtectedRoute>} />
               <Route path="/supplier" element={<ProtectedRoute requireSupplier><SupplierDashboard /></ProtectedRoute>} />
               <Route path="/supplier-pending" element={<ProtectedRoute requireSupplier><SupplierPending /></ProtectedRoute>} />
               <Route path="/supplier/add-product" element={<ProtectedRoute requireSupplier><SupplierAddProduct /></ProtectedRoute>} />

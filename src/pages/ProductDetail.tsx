@@ -127,7 +127,7 @@ export default function ProductDetail() {
             )}
             
             <div className="flex items-center gap-4 mb-6">
-              <p className="text-4xl font-bold text-primary">₹{product.price}</p>
+              <p className="text-4xl font-bold text-primary">₹{product.admin_price || product.price}</p>
               {product.discount_percent > 0 && (
                 <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-semibold">
                   {product.discount_percent}% OFF
@@ -199,7 +199,7 @@ export default function ProductDetail() {
                     <div className="aspect-square bg-secondary rounded-md mb-4" />
                   )}
                   <h3 className="font-semibold mb-2">{item.name}</h3>
-                  <p className="font-bold text-primary">₹{item.price}</p>
+                  <p className="font-bold text-primary">₹{item.admin_price || item.price}</p>
                 </div>
               ))}
             </div>
