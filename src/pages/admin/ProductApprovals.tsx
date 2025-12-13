@@ -21,38 +21,18 @@ export default function ProductApprovals() {
   useEffect(() => {
     if (!isAdmin) return;
 
-    // Subscribe to realtime changes
     const channel = supabase
       .channel('admin-products-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'products'
-        },
-        (payload) => {
-          if (payload.new.approval_status !== 'pending') {
-            setProducts(prev => prev.filter(p => p.id !== payload.new.id));
-          }
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'products' }, (payload) => {
+        if (payload.new.approval_status !== 'pending') {
+          setProducts(prev => prev.filter(p => p.id !== payload.new.id));
         }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'products'
-        },
-        () => {
-          loadProducts();
-        }
-      )
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'products' }, () => loadProducts())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'product_images' }, () => loadProducts())
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => supabase.removeChannel(channel);
   }, [isAdmin]);
 
   const loadProducts = async () => {
@@ -62,7 +42,10 @@ export default function ProductApprovals() {
       .eq('approval_status', 'pending')
       .order('created_at', { ascending: false });
     
-    if (!data) return;
+    if (!data || data.length === 0) {
+      setProducts([]);
+      return;
+    }
 
     const productIds = data.map(p => p.id);
     const supplierIds = data.map(p => p.supplier_id).filter(Boolean);

@@ -44,12 +44,9 @@ export default function FinanceDashboard() {
           table: 'products'
         },
         (payload) => {
-          console.log('Finance: Product updated:', payload);
-          // Add product if it became finance_pending
           if (payload.new.approval_status === 'finance_pending') {
             loadPendingProducts();
           }
-          // Remove product if it's no longer finance_pending
           if (payload.old?.approval_status === 'finance_pending' && payload.new.approval_status !== 'finance_pending') {
             setProducts(prev => prev.filter(p => p.id !== payload.new.id));
           }
@@ -86,10 +83,8 @@ export default function FinanceDashboard() {
 
   const loadPendingProducts = async () => {
     setLoading(true);
-    console.log('🔄 Loading finance pending products...');
     
     try {
-      // Query products with finance_pending status
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select('id, name, description, supplier_price, finance_price, created_at, supplier_id')
@@ -97,13 +92,10 @@ export default function FinanceDashboard() {
         .order('created_at', { ascending: false });
 
       if (productsError) {
-        console.error('❌ Products error:', productsError);
         toast({ title: 'Error', description: 'Failed to load products', variant: 'destructive' });
         setLoading(false);
         return;
       }
-
-      console.log('📊 Found products:', productsData?.length || 0);
 
       if (!productsData || productsData.length === 0) {
         setProducts([]);
@@ -111,7 +103,6 @@ export default function FinanceDashboard() {
         return;
       }
 
-      // Get product images and supplier profiles separately
       const productIds = productsData.map(p => p.id);
       const supplierIds = productsData.map(p => p.supplier_id).filter(Boolean);
 
@@ -120,7 +111,6 @@ export default function FinanceDashboard() {
         supabase.from('profiles').select('id, full_name, email').in('id', supplierIds)
       ]);
 
-      // Transform data
       const transformedData = productsData.map(p => {
         const image = imagesResult.data?.find(img => img.product_id === p.id);
         const profile = profilesResult.data?.find(prof => prof.id === p.supplier_id);
@@ -138,10 +128,9 @@ export default function FinanceDashboard() {
         };
       });
 
-      console.log('✅ Loaded products:', transformedData.length);
       setProducts(transformedData);
     } catch (err) {
-      console.error('❌ Exception:', err);
+      toast({ title: 'Error', description: 'Something went wrong', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -163,12 +152,9 @@ export default function FinanceDashboard() {
       .eq('id', productId);
 
     if (error) {
-      console.error('Finance update error:', error);
       toast({ title: 'Error', description: 'Failed to update price', variant: 'destructive' });
     } else {
-      console.log('Finance update success');
       toast({ title: 'Success', description: 'Price updated! Product is now live for customers.' });
-      // Immediately remove from list
       setProducts(prev => prev.filter(p => p.id !== productId));
     }
   };
