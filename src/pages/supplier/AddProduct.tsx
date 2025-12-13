@@ -89,11 +89,12 @@ export default function AddProduct() {
   const uploadImage = async (file: File, productId: string) => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${productId}-${Date.now()}.${fileExt}`;
-    const { data, error } = await supabase.storage
+    
+    const { error: uploadError } = await supabase.storage
       .from('product-images')
-      .upload(fileName, file);
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
-    if (error) throw error;
+    if (uploadError) throw uploadError;
     
     const { data: { publicUrl } } = supabase.storage
       .from('product-images')
@@ -139,12 +140,17 @@ export default function AddProduct() {
         if (error) throw error;
 
         if (product.image && newProduct) {
-          const imageUrl = await uploadImage(product.image, newProduct.id);
-          await supabase.from('product_images').insert({
-            product_id: newProduct.id,
-            image_url: imageUrl,
-            sort_order: 0
-          });
+          try {
+            const imageUrl = await uploadImage(product.image, newProduct.id);
+            const { error: imageError } = await supabase.from('product_images').insert({
+              product_id: newProduct.id,
+              image_url: imageUrl,
+              sort_order: 0
+            });
+            if (imageError) console.error('Image insert error:', imageError);
+          } catch (imgErr) {
+            console.error('Image upload error:', imgErr);
+          }
         }
       }
 

@@ -68,9 +68,6 @@ export default function ProductApprovals() {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    // Remove from UI FIRST
-    setProducts(products.filter(p => p.id !== productId));
-
     const updates: any = { approval_status: status === 'approved' ? 'finance_pending' : 'rejected' };
     
     if (status === 'approved') {
@@ -78,8 +75,16 @@ export default function ProductApprovals() {
       updates.finance_status = 'pending';
       
       const stockInput = document.querySelector(`input[data-stock-id="${productId}"]`) as HTMLInputElement;
-      if (stockInput?.value) updates.stock_quantity = parseInt(stockInput.value);
+      if (stockInput?.value) {
+        const newStock = parseInt(stockInput.value);
+        updates.stock_quantity = Math.min(newStock, product.stock_quantity);
+      } else {
+        updates.stock_quantity = product.stock_quantity;
+      }
     }
+
+    // Remove from UI FIRST
+    setProducts(products.filter(p => p.id !== productId));
 
     const { error } = await supabase.from('products').update(updates).eq('id', productId);
 
@@ -135,10 +140,11 @@ export default function ProductApprovals() {
                         <p className="text-base sm:text-lg font-bold text-muted-foreground">{product.stock_quantity}</p>
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="text-xs sm:text-sm font-medium block mb-1">Set Stock Quantity</label>
+                        <label className="text-xs sm:text-sm font-medium block mb-1">Set Stock Quantity (can only decrease)</label>
                         <input
                           type="number"
                           defaultValue={product.stock_quantity}
+                          max={product.stock_quantity}
                           data-stock-id={product.id}
                           className="w-full px-3 py-2 rounded border bg-background text-sm"
                           placeholder="Stock"

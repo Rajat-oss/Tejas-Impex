@@ -17,6 +17,7 @@ interface Product {
   image_url: string;
   description: string;
   created_at: string;
+  stock_quantity: number;
 }
 
 export default function FinanceDashboard() {
@@ -87,7 +88,7 @@ export default function FinanceDashboard() {
     try {
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('id, name, description, supplier_price, finance_price, created_at, supplier_id')
+        .select('id, name, description, supplier_price, finance_price, created_at, supplier_id, stock_quantity')
         .eq('approval_status', 'finance_pending')
         .order('created_at', { ascending: false });
 
@@ -125,6 +126,7 @@ export default function FinanceDashboard() {
           image_url: image?.image_url || '',
           supplier_name: profile?.full_name || 'N/A',
           supplier_email: profile?.email || 'N/A',
+          stock_quantity: p.stock_quantity || 0,
         };
       });
 
@@ -245,6 +247,7 @@ function ProductPriceCard({
         <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 text-xs sm:text-sm">
           <span>Supplier: <strong>{product.supplier_name}</strong></span>
           <span>Supplier Price: <strong>{formatCurrency(product.supplier_price || 0)}</strong></span>
+          <span>Stock: <strong>{product.stock_quantity}</strong></span>
         </div>
       </div>
       <div className="flex flex-col gap-2 w-full sm:w-auto sm:min-w-[180px] md:min-w-[200px]">
